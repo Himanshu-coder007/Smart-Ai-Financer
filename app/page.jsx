@@ -56,7 +56,7 @@ export default function Home() {
           <Link href="/dashboard">
             <Button
               size="lg"
-              className="bg-white text-blue-600 hover:bg-blue-50 animate-bounce mt-20"
+              className="bg-white text-blue-600 hover:bg-blue-50 animate-bounce mt-20 cursor-pointer"
             >
               Start Free Trial
             </Button>
