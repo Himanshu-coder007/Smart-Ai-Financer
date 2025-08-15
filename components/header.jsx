@@ -42,7 +42,7 @@ const Header = async () => {
           </SignedIn>
 
           <SignedOut>
-            <SignInButton mode="modal">
+             <SignInButton forceRedirectUrl="/dashboard">
               <Button variant="outline">Login</Button>
             </SignInButton>
           </SignedOut>
