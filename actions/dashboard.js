@@ -70,7 +70,7 @@ export async function createAccount(data) {
 }
 
 
-export async function getUserAccounnts(){ 
+export async function getUserAccounts(){ 
 const { userId } = await auth();
 if (!userId) throw new Error("Unauthorized");
 
@@ -82,7 +82,7 @@ if (!user) {
   throw new Error("User not found");
 }  
 
-const accounnts = await db.account.findMany({
+const account = await db.account.findMany({
   where: { userId: user.id },
   orderBy: { createdAt: "desc" }, 
   include: {
@@ -93,7 +93,7 @@ const accounnts = await db.account.findMany({
     }
   }
 });
-const serializedAccount = serializeTransaction(account);
+const serializedAccount = account.map(serializeTransaction);
 
 return serializedAccount;
 }
