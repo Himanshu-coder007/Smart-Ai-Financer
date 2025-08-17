@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -22,6 +22,10 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "./ui/switch";
 import { Button } from "./ui/button";
+import useFetch from "@/hooks/use-fetch";
+import { createAccount } from "@/actions/dashboard";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner"; // or use 'react-hot-toast' if you prefer
 
 const CreateAccountDrawer = ({ children }) => {
   const [open, setOpen] = useState(false);
@@ -43,9 +47,30 @@ const CreateAccountDrawer = ({ children }) => {
     },
   });
 
+  const {
+    data: newAccount,
+    error,
+    fn: createAccountFn,
+    loading: createAccountLoading,
+  } = useFetch(createAccount);
+
+  useEffect(() => {
+    if (newAccount && !createAccountLoading) {
+      toast.success("Account created successfully!");
+      reset();
+      setOpen(false);
+    }
+  }, [newAccount, createAccountLoading, reset]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error.message || "Failed to create account");
+    }
+  }, [error]);
+
   const onSubmit = async (data) => {
-    console.log(data);
-  }
+    await createAccountFn(data);
+  };
 
   return (
     <div>
@@ -91,12 +116,12 @@ const CreateAccountDrawer = ({ children }) => {
                 )}
               </div>
               <div>
-                <label htmlFor="name" className="text-sm font-medium">
-                  Initial Balnce
+                <label htmlFor="balance" className="text-sm font-medium">
+                  Initial Balance
                 </label>
                 <Input
                   id="balance"
-                  type={"number"}
+                  type="number"
                   step="0.01"
                   placeholder="0.00"
                   {...register("balance")}
@@ -110,16 +135,15 @@ const CreateAccountDrawer = ({ children }) => {
               <div className="flex items-center justify-between rounded-lg border p-3">
                 <div className="space-y-0.5">
                   <label
-                    htmlFor="balance"
+                    htmlFor="isDefault"
                     className="text-sm font-medium cursor-pointer"
                   >
                     Set as Default
                   </label>
                   <p className="text-sm text-muted-foreground">
-                    This account will be selected by default for transaction
+                    This account will be selected by default for transactions
                   </p>
                 </div>
-
                 <Switch
                   id="isDefault"
                   onCheckedChange={(checked) => setValue("isDefault", checked)}
@@ -128,12 +152,23 @@ const CreateAccountDrawer = ({ children }) => {
               </div>
               <div className="flex gap-4 pt-4">
                 <DrawerClose asChild>
-                  <Button type="button" varient="outline" className="flex-1">
+                  <Button type="button" variant="outline" className="flex-1">
                     Cancel
                   </Button>
                 </DrawerClose>
-                <Button type="submit" className="flex-1">
-                  Create Account
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  disabled={createAccountLoading}
+                >
+                  {createAccountLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Account"
+                  )}
                 </Button>
               </div>
             </form>
