@@ -1,6 +1,6 @@
 import HeroSection from "@/components/hero";
 import { Card, CardContent } from "@/components/ui/card";
-import { featuresData, howItWorksData, statsData } from "./data/landing";
+import { featuresData, howItWorksData, statsData } from "../data/landing";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
