@@ -8,7 +8,7 @@ import {
   TableCaption,
   TableCell,
   TableHead,
-  TableHeader,
+ TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import {
@@ -47,6 +47,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { bulkDeleteTransactions } from "@/actions/account";
 
 const RECURRING_INTERVALS = {
   DAILY: "Daily",
@@ -65,8 +66,9 @@ const TransactionTable = ({ transaction, deleteFn }) => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
-  const [recurringFilter, setRecurringFilter] = useState(""); // Fixed typo in variable name
-  const [currentPage, setCurrentPage] = useState(1); // Added missing state
+  const [recurringFilter, setRecurringFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Ensure we have an array to work with
   const transactionsArray = Array.isArray(transaction) ? transaction : [];
@@ -133,9 +135,25 @@ const TransactionTable = ({ transaction, deleteFn }) => {
     );
   };
 
-  const handleBulkDelete = () => {
-    deleteFn(selectedIds);
-    setSelectedIds([]);
+  const handleBulkDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const result = await bulkDeleteTransactions(selectedIds);
+      
+      if (result.success) {
+        // Clear selection after successful deletion
+        setSelectedIds([]);
+        // Refresh the page to reflect changes
+        router.refresh();
+      } else {
+        console.error("Failed to delete transactions:", result.error);
+        // You might want to show an error toast/notification here
+      }
+    } catch (error) {
+      console.error("Error deleting transactions:", error);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleClearFilters = () => {
@@ -201,9 +219,19 @@ const TransactionTable = ({ transaction, deleteFn }) => {
                 variant="destructive"
                 size="sm"
                 onClick={handleBulkDelete}
+                disabled={isDeleting}
               >
-                <Trash className="h-4 w-4 mr-2" />
-                Delete Selected ({selectedIds.length})
+                {isDeleting ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash className="h-4 w-4 mr-2" />
+                    Delete Selected ({selectedIds.length})
+                  </>
+                )}
               </Button>
             </div>
           )}
